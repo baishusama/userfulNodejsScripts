@@ -37,7 +37,9 @@ function vuejsi18n(js, needThis = false) {
             }
         }
     });
-    js = js.slice(1, -1);
+    if (isJSON) {
+        js = js.slice(1, -1);
+    }
     let transformedContent = '';
     if (needTransform.length) {
         for (let i = 0; i < needTransform.length; i++) {
