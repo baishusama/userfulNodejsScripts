@@ -15,6 +15,7 @@ function vuetemplatei18n(templateContent) {
         };
         let curNode = needTransform[i];
         let needTransformString = templateContent.slice(curNode.start, curNode.end);
+        console.log(needTransformString)
         let visibleStringStart = needTransformString.search(/\S/);
         let visibleStringEnd =
             needTransformString.length -
@@ -124,21 +125,20 @@ function analysisAst(ast, array,templateContent) {
     if (ast.type == 3) {
         let start = ast.start ;
         let end = ast.end ;
-        let offset = calcOffset(templateContent.slice(start),ast.text)
+        let offset = calcOffset(templateContent.slice(start),ast.text.trim())
         array.push({
             start:start+offset,
-            end:end+offset,
+            end:start+ast.text.trim().length+offset,
             type: 'htmlContent'
         });
     }
     if (ast.type == 2) {
         let start = ast.start ;
         let end = ast.end ;
-        let offset = calcOffset(templateContent.slice(start),ast.text)
-
+        let offset = calcOffset(templateContent.slice(start),ast.text.trim())
         array.push({
             start:start+offset,
-            end:end+offset,
+            end:start+ast.text.trim().length+offset,
             tokens: ast.tokens,
             type: 'htmlDynamicContent'
         });

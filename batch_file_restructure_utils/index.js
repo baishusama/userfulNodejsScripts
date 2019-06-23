@@ -17,13 +17,13 @@ function compileVueMiddleware(file) {
         console.log(updated);
         file.content = file.content.slice(0, parse.template.start) + updated + file.content.slice(parse.template.end);
     }
-    // parse = compiler.parseComponent(file.content);
-    // if (parse.script) {
-    //     let updated = vuejsi18n(parse.script.content, true);
-    //     file.content = file.content.slice(0, parse.script.start) + updated + file.content.slice(parse.script.end);
-    // }
-    // parse = compiler.parseComponent(file.content);
-    // file.content = vuei18ntag(parse, file.content);
+    parse = compiler.parseComponent(file.content);
+    if (parse.script) {
+        let updated = vuejsi18n(parse.script.content, true);
+        file.content = file.content.slice(0, parse.script.start) + updated + file.content.slice(parse.script.end);
+    }
+    parse = compiler.parseComponent(file.content);
+    file.content = vuei18ntag(parse, file.content);
     return file;
 }
 
@@ -36,6 +36,6 @@ filePaths.map(filePath => {
         return;
     }
     let file = allProcesses[extname]({ content, filePath });
-    // fs.writeFileSync(file.filePath, file.content);
+    fs.writeFileSync(file.filePath, file.content);
 });
 console.log('batch doned');
