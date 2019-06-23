@@ -1,27 +1,3 @@
-<i18n>
-{
-    "cn": {
-        "（已实名）": "（已实名）",
-        "（未实名）": "（未实名）",
-        "最近文件": "最近文件",
-        "全部文件": "全部文件",
-        "搜索文件名称/编号/签署方": "搜索文件名称/编号/签署方",
-        "取消": "取消",
-        "申请使用": "申请使用",
-        "印章": "印章",
-        "物理章": "物理章",
-        "次": "次",
-        "申请时间：": "申请时间：",
-        "签署有效期：": "签署有效期：",
-        "未搜索到相关数据": "未搜索到相关数据",
-        "小助手": "小助手",
-        "设置个人签名": "设置个人签名",
-        "实名认证": "实名认证",
-        "什么是电子合同？": "什么是电子合同？",
-        "正在加载，请稍候": "正在加载，请稍候"
-    }
-}
-</i18n>
 <template>
 <div class="home-page" @scroll="throttle(down)()">
     <header>
@@ -36,13 +12,13 @@
                 </template>
             </svg>
             <span class="inline name-text">
-                {{_f("mosaic")((userMes.name || userMes.contact))}}
+                {{ (userMes.name || userMes.contact) | mosaic }}
                 <span class="tips inline">
                     <template v-if="isRealName">
-                        {{$t('（已实名）')}}
+                        （已实名）
                     </template>
                     <template v-else>
-                        {{$t('（未实名）')}}
+                        （未实名）
                     </template>
                 </span>
             </span>
@@ -61,19 +37,19 @@
         <span
             class="unselect"
             @click="status.push('recent');"
-            :class="{'select':isRecent,'search-show':isSearch}">{{$t('最近文件')}}</span>
+            :class="{'select':isRecent,'search-show':isSearch}">最近文件</span>
         <span
             class="unselect"
             @click="status.push('');"
-            :class="{'select':isAll,'search-show':isSearch}">{{$t('全部文件')}}</span>
+            :class="{'select':isAll,'search-show':isSearch}">全部文件</span>
         <div class="fr search vertical-center" :class="{'search-show':isSearch}">
             <i class="anticon" @click="status.push('search')">&#xe707</i>
-            <input :placeholder="$t('搜索文件名称/编号/签署方')" v-model="keyword"/>
+            <input placeholder="搜索文件名称/编号/签署方" v-model="keyword"/>
             <span class="delete" v-if="isSearch&&keyword" @click="keyword=''">
                 <i class="anticon">&#xe709</i>
             </span>
             <span class="return" v-if='isSearch' @click="status.pop()">
-                {{$t('取消')}}
+                取消
             </span>
         </div>
     </div>
@@ -95,12 +71,12 @@
                 <div class="stream">
                     <template v-if="item.categoryType=='SEAL'">
                         <span class="sealname ellipsis inline">
-                            {{item.applyerName}}{{$t('申请使用')}}
+                            {{item.applyerName}}申请使用
                             <template v-if="item.sealName">【{{item.sealName}}】</template>
-                            <template v-else>{{$t('印章')}}</template>
+                            <template v-else>印章</template>
                         </span>
-                        <span class="physical inline">{{$t('物理章')}}</span>
-                        <span class="count inline">{{item.sealUsageCount}}{{$t('次')}}</span>
+                        <span class="physical inline">物理章</span>
+                        <span class="count inline">{{item.sealUsageCount}}次</span>
                     </template>
                     <template v-if="item.categoryType=='CONTRACT'">
                         <span class="anticon ellipsis" v-if="item.draftsman">{{item.draftsman}}</span>
@@ -115,8 +91,8 @@
                     <div class="border"></div>
                 </div>
                 <div class="stream">
-                    <span v-if="item.categoryType=='SEAL'">{{$t('申请时间：')}}{{_f("expire")(item.createTime)}}</span>
-                    <span v-if="item.categoryType=='CONTRACT'">{{$t('签署有效期：')}}{{_f("expire")(item.expireTime)}}</span>
+                    <span v-if="item.categoryType=='SEAL'">申请时间：{{item.createTime|expire}}</span>
+                    <span v-if="item.categoryType=='CONTRACT'">签署有效期：{{item.expireTime|expire}}</span>
                 </div>
             </div>
             <waiting v-if="hasSend"></waiting>
@@ -124,27 +100,27 @@
         <template v-else>
             <div class="middle-center" v-if="isSearch">
                 <img src="../assets/img/no-search.png" alt="" width="160px;"/>
-                <div class="" style="text-align:center;font-size:12px;color:#c0c0c0;">{{$t('未搜索到相关数据')}}</div>
+                <div class="" style="text-align:center;font-size:12px;color:#c0c0c0;">未搜索到相关数据</div>
             </div>
         </template>
     </section>
     <div class="helper clearfix" v-if="!helperClose&&isRecent">
         <div class="title">
-            {{$t('小助手')}}
+            小助手
             <i class="anticon fr" @click="close">&#xe708</i>
         </div>
         <router-link :to="{ name: 'signature', params: {signType:'new'} }">
             <div class="list-item " v-if="!hasSign">
-                {{$t('设置个人签名')}}
+                设置个人签名
             </div>
         </router-link>
         <div class="list-item " v-if="!isRealName" @click="userAuth">
-            {{$t('实名认证')}}
+            实名认证
         </div>
         <a
             class="list-item "
             href="https://help.qiyuesuo.com/library/article/2452014063788740609">
-            {{$t('什么是电子合同？')}}
+            什么是电子合同？
         </a>
         <img
             v-if="!hasSign&&!isRealName"
@@ -224,7 +200,7 @@ export default {
                 const self = this;
                 self.debounce(() => {
                     let contract;
-                    let loading = this.$loading(this.$t('正在加载，请稍候'));
+                    let loading = this.$loading('正在加载，请稍候');
                     (async function() {
                         try {
                             ({ body: contract } = await self.getBusinessList(1));
@@ -251,7 +227,7 @@ export default {
                     return;
                 }
                 if (!self.isSearch) {
-                    loading = this.$loading(this.$t('正在加载，请稍候'));
+                    loading = this.$loading('正在加载，请稍候');
                 }
                 (async function() {
                     try {
@@ -284,7 +260,7 @@ export default {
         const self = this;
         let count, seal, contract, helperClose;
 
-        let loading = this.$loading(this.$t('正在加载，请稍候'));
+        let loading = this.$loading('正在加载，请稍候');
         let quser;
         (async function() {
             try {
@@ -321,8 +297,8 @@ export default {
     mounted: function() {
         if (window.sessionStorage.identitied == 'true') {
             this.$message(
-                this.$t(`<p style="color:white;font-size:15px;text-align: center;"><i class="anticon logo-icon" style="color: #53bdfe;">&#xe60c</i>认证成功</p>
-                <p style="color:#ccc;font-size:12px;">恭喜您，实名认证成功</p>`)
+                `<p style="color:white;font-size:15px;text-align: center;"><i class="anticon logo-icon" style="color: #53bdfe;">&#xe60c</i>认证成功</p>
+                <p style="color:#ccc;font-size:12px;">恭喜您，实名认证成功</p>`
             );
             window.sessionStorage.identitied = false;
         }
