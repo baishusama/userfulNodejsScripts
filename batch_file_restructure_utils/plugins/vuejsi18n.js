@@ -20,7 +20,13 @@ function vuejsi18n(js, needThis = false) {
         enter(path) {
             if (path.isIdentifier({ name: '$t' })) {
                 path.stop();
-                return;
+            }
+            if (path.isCallExpression()) {
+                let temp = path.node.callee && path.node.callee.property;
+                temp = temp || {};
+                if (temp.type == 'Identifier' && temp.name == '$t') {
+                    path.stop();
+                }
             }
             if (path.isStringLiteral() || path.isTemplateLiteral() || path.isDirectiveLiteral()) {
                 let node = path.node;
