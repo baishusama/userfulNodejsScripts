@@ -15,14 +15,6 @@ function vuetemplatei18n(templateContent) {
         };
         let curNode = needTransform[i];
         let needTransformString = templateContent.slice(curNode.start, curNode.end);
-        let visibleStringStart = needTransformString.search(/\S/);
-        let visibleStringEnd =
-            needTransformString.length -
-            needTransformString
-                .split('')
-                .reverse()
-                .join('')
-                .search(/\S/);
         let transformedString = '';
         let isNeedTransform = /[\u4e00-\u9fa5]/;
         switch (curNode.type) {
@@ -64,7 +56,8 @@ function vuetemplatei18n(templateContent) {
                         } else {
                             return `{{${vuejsi18n(token['@binding'])}}}`;
                         }
-                    })}`;
+                    })
+                    .join('')}`;
                 break;
             default:
                 throw new Error('没有类型');
