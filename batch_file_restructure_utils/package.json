@@ -1,0 +1,20 @@
+{
+  "name": "batch_file_restructure_utils",
+  "version": "1.0.0",
+  "description": "some useful npdejs scripts",
+  "main": "batch_prettier.js",
+  "dependencies": {
+    "@babel/parser": "^7.4.5",
+    "@babel/traverse": "^7.4.5",
+    "glob": "^7.1.4",
+    "path": "^0.12.7",
+    "prettier": "^1.18.2",
+    "vue-template-compiler": "^2.6.10"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}
