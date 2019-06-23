@@ -4,10 +4,10 @@ module.exports = vuetemplatei18n;
 
 function vuetemplatei18n(templateContent) {
     let { ast } = compiler.compile(templateContent, {
-        outputSourceRange: true,
+        outputSourceRange: true
     });
     let needTransform = [];
-    analysisAst(ast, needTransform,templateContent);
+    analysisAst(ast, needTransform, templateContent);
     let transformedContent = '';
     for (let i = 0; i < needTransform.length; i++) {
         let preNode = needTransform[i - 1] || {
@@ -15,7 +15,6 @@ function vuetemplatei18n(templateContent) {
         };
         let curNode = needTransform[i];
         let needTransformString = templateContent.slice(curNode.start, curNode.end);
-        console.log(needTransformString)
         let visibleStringStart = needTransformString.search(/\S/);
         let visibleStringEnd =
             needTransformString.length -
@@ -31,13 +30,9 @@ function vuetemplatei18n(templateContent) {
                 if (!isNeedTransform.test(needTransformString)) {
                     transformedString = needTransformString;
                 } else {
-                    transformedString = `${needTransformString.slice(
-                        0,
-                        visibleStringStart
-                    )}:${needTransformString
-                        .slice(visibleStringStart, visibleStringEnd)
-                        .replace(curNode.value, `"$t('${curNode.value.slice(1, -1)}')"`)}${needTransformString.slice(
-                        visibleStringEnd
+                    transformedString = `:${needTransformString.replace(
+                        curNode.value,
+                        `"$t('${curNode.value.slice(1, -1)}')"`
                     )}`;
                 }
                 break;
@@ -45,41 +40,31 @@ function vuetemplatei18n(templateContent) {
                 if (!isNeedTransform.test(needTransformString)) {
                     transformedString = needTransformString;
                 } else {
-                    transformedString = `${needTransformString.slice(
-                        0,
-                        visibleStringStart
-                    )}{{$t('${needTransformString.slice(
-                        visibleStringStart,
-                        visibleStringEnd
-                    )}')}}${needTransformString.slice(visibleStringEnd)}`;
+                    transformedString = `{{$t('${needTransformString}')}}`;
                 }
                 break;
             case 'htmlDynamicAttr':
-                transformedString = `${needTransformString.slice(0, visibleStringStart)}${needTransformString
-                    .slice(visibleStringStart, visibleStringEnd)
-                    .replace(curNode.value, vuejsi18n(curNode.value))}${needTransformString.slice(visibleStringEnd)}`;
+                transformedString = needTransformString.replace(curNode.value, vuejsi18n(curNode.value));
                 break;
             case 'htmlDynamicContent':
-                transformedString = `${needTransformString.slice(0, visibleStringStart)}${curNode.tokens
+                transformedString = `${curNode.tokens
                     .filter(token => {
                         if (typeof token == 'string') {
                             return !!token.replace(/\s/g, '');
-                        } else {
-                            return true;
                         }
+                        return true;
                     })
                     .map(token => {
                         if (typeof token == 'string') {
                             if (!isNeedTransform.test(token)) {
-                                return `${token.trim()}`;
+                                return `${token}`;
                             } else {
-                                return `{{ $t('${token.trim()}') }}`;
+                                return `{{$t('${token.trim()}')}}`;
                             }
                         } else {
-                            return `{{ ${vuejsi18n(token['@binding'])} }}`;
+                            return `{{${vuejsi18n(token['@binding'])}}}`;
                         }
-                    })
-                    .join(' ')}${needTransformString.slice(visibleStringEnd)}`;
+                    })}`;
                 break;
             default:
                 throw new Error('没有类型');
@@ -96,17 +81,17 @@ function vuetemplatei18n(templateContent) {
     }
     return transformedContent;
 }
-function calcOffset(whole,child){
-    return whole.indexOf(child)
+function calcOffset(whole, child) {
+    return whole.indexOf(child);
 }
-function analysisAst(ast, array,templateContent) {
+function analysisAst(ast, array, templateContent) {
     ast.attrs &&
         ast.attrs.map(attr => {
-            let start = attr.start ;
-            let end = attr.end ;
-            let offset =0;
-            while(calcOffset(templateContent.slice(start+offset,end+offset),attr.value)==-1){
-                offset++
+            let start = attr.start;
+            let end = attr.end;
+            let offset = 0;
+            while (calcOffset(templateContent.slice(start + offset, end + offset), attr.value) == -1) {
+                offset++;
             }
             let type = '';
             if (attr.dynamic === undefined) {
@@ -115,43 +100,43 @@ function analysisAst(ast, array,templateContent) {
                 type = 'htmlDynamicAttr';
             }
             array.push({
-                start: start+offset,
-                end: end+offset,
+                start: start + offset,
+                end: end + offset,
                 value: attr.value,
                 type
             });
         });
     //type 为 1 表示是普通元素，为 2 表示是表达式，为 3 表示是纯文本
     if (ast.type == 3) {
-        let start = ast.start ;
-        let end = ast.end ;
-        let offset = calcOffset(templateContent.slice(start),ast.text.trim())
+        let start = ast.start;
+        let end = ast.end;
+        let offset = calcOffset(templateContent.slice(start), ast.text.trim());
         array.push({
-            start:start+offset,
-            end:start+ast.text.trim().length+offset,
+            start: start + offset,
+            end: start + ast.text.trim().length + offset,
             type: 'htmlContent'
         });
     }
     if (ast.type == 2) {
-        let start = ast.start ;
-        let end = ast.end ;
-        let offset = calcOffset(templateContent.slice(start),ast.text.trim())
+        let start = ast.start;
+        let end = ast.end;
+        let offset = calcOffset(templateContent.slice(start), ast.text.trim());
         array.push({
-            start:start+offset,
-            end:start+ast.text.trim().length+offset,
+            start: start + offset,
+            end: start + ast.text.trim().length + offset,
             tokens: ast.tokens,
             type: 'htmlDynamicContent'
         });
     }
     if (ast.children) {
         ast.children.map(childNode => {
-            analysisAst(childNode, array,templateContent);
+            analysisAst(childNode, array, templateContent);
         });
     }
     if (ast.ifConditions) {
         ast.ifConditions.map((childNode, index) => {
             if (index == 0) return;
-            analysisAst(childNode.block, array,templateContent);
+            analysisAst(childNode.block, array, templateContent);
         });
     }
 }
