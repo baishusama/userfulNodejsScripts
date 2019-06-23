@@ -86,28 +86,30 @@ function analysisJs(js, i18nScript) {
     });
     traverse(jsAst, {
         enter(path) {
-            if (path.isIdentifier({ name: '$t' })) {
-                if (path.parent.arguments) {
-                    path.parent.arguments.map(node => {
-                        if (
-                            node.type == 'StringLiteral' ||
-                            node.type == 'TemplateLiteral' ||
-                            node.type == 'DirectiveLiteral'
-                        ) {
+            if (path.isCallExpression()) {
+                let callee = path.node.callee;
+                let property = callee.property || {};
+                if (property.type == 'Identifier' && property.name == '$t') {
+                    path.node.arguments.map(node => {
+                        if (node.type == 'StringLiteral' || node.type == 'DirectiveLiteral') {
                             i18nScript.push(node.value);
                         }
-                    });
-                } else {
-                    path.parentPath.parent.arguments.map(node => {
-                        if (
-                            node.type == 'StringLiteral' ||
-                            node.type == 'TemplateLiteral' ||
-                            node.type == 'DirectiveLiteral'
-                        ) {
-                            i18nScript.push(node.value);
+                        if (node.type == 'TemplateLiteral') {
+                            i18nScript.push(node.quasis[0].value.raw);
                         }
                     });
+                    path.stop();
                 }
+            }
+            if (path.isIdentifier({ name: '$t' })) {
+                path.parent.arguments.map(node => {
+                    if (node.type == 'StringLiteral' || node.type == 'DirectiveLiteral') {
+                        i18nScript.push(node.value);
+                    }
+                    if (node.type == 'TemplateLiteral') {
+                        i18nScript.push(node.quasis[0].value.raw);
+                    }
+                });
                 path.stop();
             }
         }
