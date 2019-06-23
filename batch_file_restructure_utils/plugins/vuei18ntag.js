@@ -77,9 +77,7 @@ function analysisJs(js, i18nScript) {
         if (eval(`typeof ${js}`) == 'object') {
             js = `(${js})`;
         }
-    } catch (error) {
-        console.log('dasda');
-    }
+    } catch (error) {}
     let jsAst = babelParser.parse(js, {
         range: true,
         sourceType: 'module'
@@ -95,7 +93,9 @@ function analysisJs(js, i18nScript) {
                             i18nScript.push(node.value);
                         }
                         if (node.type == 'TemplateLiteral') {
-                            i18nScript.push(node.quasis[0].value.raw);
+                            node.quasis.map(quasis => {
+                                i18nScript.push(quasis.value.raw);
+                            });
                         }
                     });
                     path.stop();
@@ -107,7 +107,9 @@ function analysisJs(js, i18nScript) {
                         i18nScript.push(node.value);
                     }
                     if (node.type == 'TemplateLiteral') {
-                        i18nScript.push(node.quasis[0].value.raw);
+                        node.quasis.map(quasis => {
+                            i18nScript.push(quasis.value.raw);
+                        });
                     }
                 });
                 path.stop();

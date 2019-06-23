@@ -9,6 +9,9 @@ function vuetemplatei18n(templateContent) {
     let needTransform = [];
     analysisAst(ast, needTransform, templateContent);
     let transformedContent = '';
+    if (needTransform.length === 0) {
+        return templateContent;
+    }
     for (let i = 0; i < needTransform.length; i++) {
         let preNode = needTransform[i - 1] || {
             end: 0
@@ -102,7 +105,6 @@ function analysisAst(ast, array, templateContent) {
     //type 为 1 表示是普通元素，为 2 表示是表达式，为 3 表示是纯文本
     if (ast.type == 3) {
         let start = ast.start;
-        let end = ast.end;
         let offset = calcOffset(templateContent.slice(start), ast.text.trim());
         array.push({
             start: start + offset,
@@ -112,14 +114,15 @@ function analysisAst(ast, array, templateContent) {
     }
     if (ast.type == 2) {
         let start = ast.start;
-        let end = ast.end;
         let offset = calcOffset(templateContent.slice(start), ast.text.trim());
-        array.push({
-            start: start + offset,
-            end: start + ast.text.trim().length + offset,
-            tokens: ast.tokens,
-            type: 'htmlDynamicContent'
-        });
+        if (!ast.text.search(' | ')) {
+            array.push({
+                start: start + offset,
+                end: start + ast.text.trim().length + offset,
+                tokens: ast.tokens,
+                type: 'htmlDynamicContent'
+            });
+        }
     }
     if (ast.children) {
         ast.children.map(childNode => {

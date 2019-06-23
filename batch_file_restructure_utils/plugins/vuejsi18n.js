@@ -8,9 +8,7 @@ function vuejsi18n(js, needThis = false) {
             js = `(${js})`;
             isJSON = true;
         }
-    } catch (error) {
-        console.log('111');
-    }
+    } catch (error) {}
     let ast = babelParser.parse(js, {
         range: true,
         sourceType: 'module'
