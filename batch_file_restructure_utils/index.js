@@ -14,7 +14,6 @@ function compileVueMiddleware(file) {
     parse = compiler.parseComponent(file.content);
     if (parse.template) {
         let updated = vuetemplatei18n(parse.template.content);
-        console.log(updated);
         file.content = file.content.slice(0, parse.template.start) + updated + file.content.slice(parse.template.end);
     }
     parse = compiler.parseComponent(file.content);

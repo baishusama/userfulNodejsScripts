@@ -1,5 +1,7 @@
 const compiler = require('vue-template-compiler');
 const vuejsi18n = require('./vuejsi18n');
+const babelParser = require('@babel/parser');
+
 module.exports = vuetemplatei18n;
 
 function vuetemplatei18n(templateContent) {
@@ -57,7 +59,19 @@ function vuetemplatei18n(templateContent) {
                                 return `{{$t('${token.trim()}')}}`;
                             }
                         } else {
-                            return `{{${vuejsi18n(token['@binding'])}}}`;
+                            let isFilter = /^_f\(/.test(token['@binding']);
+                            if (isFilter) {
+                                let js = token['@binding'];
+                                let ast = babelParser.parse(js, {
+                                    range: true,
+                                    sourceType: 'module'
+                                });
+                                let filters = [];
+                                filters.unshift(parseFilter(ast.program.body[0].expression, filters, js));
+                                return `{{${filters.join(' | ')}}}`;
+                            } else {
+                                return `{{${vuejsi18n(token['@binding'])}}}`;
+                            }
                         }
                     })
                     .join('')}`;
@@ -76,6 +90,18 @@ function vuetemplatei18n(templateContent) {
         }
     }
     return transformedContent;
+}
+function parseFilter(ast, filters, js) {
+    while (
+        ast.callee &&
+        ast.callee.callee &&
+        ast.callee.callee.type == 'Identifier' &&
+        ast.callee.callee.name == '_f'
+    ) {
+        filters.unshift(ast.callee.arguments[0].value);
+        ast = ast.arguments[0];
+    }
+    return vuejsi18n(js.slice(ast.start, ast.end));
 }
 function calcOffset(whole, child) {
     return whole.indexOf(child);
@@ -115,14 +141,12 @@ function analysisAst(ast, array, templateContent) {
     if (ast.type == 2) {
         let start = ast.start;
         let offset = calcOffset(templateContent.slice(start), ast.text.trim());
-        if (!ast.text.search(' | ')) {
-            array.push({
-                start: start + offset,
-                end: start + ast.text.trim().length + offset,
-                tokens: ast.tokens,
-                type: 'htmlDynamicContent'
-            });
-        }
+        array.push({
+            start: start + offset,
+            end: start + ast.text.trim().length + offset,
+            tokens: ast.tokens,
+            type: 'htmlDynamicContent'
+        });
     }
     if (ast.children) {
         ast.children.map(childNode => {
