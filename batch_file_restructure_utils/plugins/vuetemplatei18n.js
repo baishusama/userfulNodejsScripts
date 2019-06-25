@@ -112,6 +112,11 @@ function analysisAst(ast, array, templateContent) {
             if (attr.value == '""') {
                 return;
             }
+            let isFilter = /^_f\(/.test(attr.value);
+            if (isFilter) {
+                console.log('不支持' + attr.value);
+                return;
+            }
             let start = attr.start;
             let end = attr.end;
             let offset = 0;
