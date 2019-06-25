@@ -34,6 +34,13 @@ function vuetemplatei18n(templateContent) {
                     )}`;
                 }
                 break;
+            case 'htmlDirective':
+                if (!isNeedTransform.test(needTransformString)) {
+                    transformedString = needTransformString;
+                } else {
+                    transformedString = needTransformString.replace(curNode.value, vuejsi18n(curNode.value));
+                }
+                break;
             case 'htmlContent':
                 if (!isNeedTransform.test(needTransformString)) {
                     transformedString = needTransformString;
@@ -108,6 +115,31 @@ function calcOffset(whole, child) {
     return whole.indexOf(child);
 }
 function analysisAst(ast, array, templateContent) {
+    ast.directives &&
+        ast.directives.map(directive => {
+            if (directive.value == '""') {
+                return;
+            }
+            let isFilter = /^_f\(/.test(directive.value);
+            if (isFilter) {
+                console.log('不支持' + directive.value);
+                return;
+            }
+            let start = directive.start;
+            let end = directive.end;
+            let offset = 0;
+            while (calcOffset(templateContent.slice(start + offset, end + offset), directive.value) == -1) {
+                offset++;
+            }
+
+            let type = 'htmlDirective';
+            array.push({
+                start: start + offset,
+                end: end + offset,
+                value: directive.value,
+                type
+            });
+        });
     ast.attrs &&
         ast.attrs.map(attr => {
             if (attr.value == '""') {

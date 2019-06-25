@@ -48,12 +48,15 @@ function vuei18ntag(parse, content) {
     return content;
 }
 function analysisAst(ast, array) {
+    ast.directives &&
+        ast.directives.map(directive => {
+            array.push(directive.value);
+        });
     ast.attrs &&
         ast.attrs.map(attr => {
             if (attr.dynamic === undefined) {
                 return;
             }
-            let type = 'htmlDynamicAttr';
             array.push(attr.value);
         });
     //type 为 1 表示是普通元素，为 2 表示是表达式，为 3 表示是纯文本
