@@ -10,6 +10,7 @@ function vuetemplatei18n(templateContent) {
     });
     let needTransform = [];
     analysisAst(ast, needTransform, templateContent);
+    needTransform.sort((a, b) => a.start - b.start);
     let transformedContent = '';
     if (needTransform.length === 0) {
         return templateContent;
