@@ -156,6 +156,10 @@ function analysisAst(ast, array, templateContent) {
             while (calcOffset(templateContent.slice(start + offset, end + offset), attr.value) == -1) {
                 offset++;
             }
+            let whitespacelength =
+                templateContent.slice(start + offset, end + offset).length -
+                templateContent.slice(start + offset, end + offset).replace(/^\s{1,}/, '').length;
+            offset += whitespacelength;
             let type = '';
             if (attr.dynamic === undefined) {
                 type = 'htmlAttr';
