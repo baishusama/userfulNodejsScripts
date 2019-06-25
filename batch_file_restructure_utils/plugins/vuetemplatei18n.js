@@ -109,6 +109,9 @@ function calcOffset(whole, child) {
 function analysisAst(ast, array, templateContent) {
     ast.attrs &&
         ast.attrs.map(attr => {
+            if (attr.value == '""') {
+                return;
+            }
             let start = attr.start;
             let end = attr.end;
             let offset = 0;
