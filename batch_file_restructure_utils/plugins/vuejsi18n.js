@@ -38,7 +38,6 @@ function vuejsi18n(js, needThis = false) {
                     start,
                     end
                 });
-                path.stop();
             }
         }
     });
