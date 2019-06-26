@@ -2,9 +2,10 @@ const prettier = require('prettier');
 const compiler = require('vue-template-compiler');
 const babelParser = require('@babel/parser');
 const traverse = require('@babel/traverse').default;
+const translate = require('./google-translate-cn');
 
 module.exports = vuei18ntag;
-function vuei18ntag(parse, content) {
+async function vuei18ntag(parse, content) {
     let containi18nNodes = [];
     let { ast: templateAst } = compiler.compile(parse.template.content, {
         outputSourceRange: true
@@ -29,11 +30,15 @@ function vuei18ntag(parse, content) {
         content: JSON.stringify({ cn: {} })
     };
     let json = JSON.parse(i18n.content.replace(/\r|\n/, ''));
+    if(!json.en){
+        json.en={}
+    }
     i18nScript.map(script => {
         if (!json.cn[script]) {
             json.cn[script] = script;
         }
     });
+    await asyncTranslateToEN(json);
     let formated = prettier.format(JSON.stringify(json, null, ' '), {
         printWidth: 120,
         singleQuote: true,
@@ -46,6 +51,23 @@ function vuei18ntag(parse, content) {
         content = `<i18n>\r\n${formated}</i18n>\r\n` + content;
     }
     return content;
+}
+async function sleep(time){
+    return new Promise(function(resolve, reject) {
+        setTimeout(function() {
+            resolve();
+        }, time);
+    });
+}
+async function asyncTranslateToEN(obj) {
+    const textArr = Object.values(obj.cn).map(val => val);
+
+    for(let i =0;i<textArr.length;i++){
+        let item = textArr[i];
+        let res = await translate(item, { from: 'auto', to: 'en' });
+        obj.en[item]=res.text;
+        await sleep(100);
+    }
 }
 function analysisAst(ast, array) {
     ast.directives &&

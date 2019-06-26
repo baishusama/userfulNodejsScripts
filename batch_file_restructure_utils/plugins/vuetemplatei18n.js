@@ -182,6 +182,7 @@ function analysisAst(ast, array, templateContent) {
             end: start + ast.text.trim().length + offset,
             type: 'htmlContent'
         });
+        console.log(templateContent.slice(ast.start, ast.end));
     }
     if (ast.type == 2) {
         let start = ast.start;
